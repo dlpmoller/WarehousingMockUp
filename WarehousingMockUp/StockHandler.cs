@@ -54,6 +54,12 @@ namespace WarehousingMockUp
             get { return this.stock; }
         }
 
+        //todo: re-do this
+        /// <summary>
+        /// Returns item names
+        /// </summary>
+        /// <param name="masterList"></param>
+        /// <returns></returns>
         public virtual string getItemName(List<MaterialMaster> masterList)
         {
             foreach (MaterialMaster item in masterList)
@@ -66,6 +72,12 @@ namespace WarehousingMockUp
             return "Item does not exist";
         }
 
+        //todo: Re-do this
+        /// <summary>
+        /// Returns item descriptions
+        /// </summary>
+        /// <param name="masterList"></param>
+        /// <returns></returns>
         public virtual string getItemDescription(List<MaterialMaster> masterList)
         {
             foreach (MaterialMaster item in masterList)

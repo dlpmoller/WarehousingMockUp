@@ -75,6 +75,12 @@ namespace WarehousingMockUp
             return componentStockList[itemID];
         }
 
+        /// <summary>
+        /// Adds a recipe for production orders to add components with
+        /// </summary>
+        /// <param name="productionId"></param>
+        /// <param name="product"></param>
+        /// <param name="componentsNeeded"></param>
         public void AddToRecipeList(int productionId, int product, int[,] componentsNeeded)
         {
             recipeList.Add(new ProductionHandler(productionId, componentsNeeded, product));
@@ -173,6 +179,12 @@ namespace WarehousingMockUp
             AddToStockList(item, true);
         }
 
+        /// <summary>
+        /// Adds order to the order queue
+        /// </summary>
+        /// <param name="productionOrder"></param>
+        /// <param name="purchaseOrder"></param>
+        /// <param name="salesOrder"></param>
         public void AddOrder(ProductionOrders? productionOrder, PurchaseOrders? purchaseOrder, SalesOrders? salesOrder)
         {
             dynamic order;
@@ -191,6 +203,12 @@ namespace WarehousingMockUp
             }
         }
 
+        /// <summary>
+        /// Adds product to an order's list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="product"></param>
+        /// <param name="orderType"></param>
         public void AddProductToOrder(int id, ProductStock product, string orderType)
         {
             switch (orderType)
@@ -207,6 +225,12 @@ namespace WarehousingMockUp
             }
         }
 
+        /// <summary>
+        /// Adds component to an order's list
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="component"></param>
+        /// <param name="orderType"></param>
         public void AddComponentToOrder(int id, ComponentStock component, string orderType)
         {
             switch (orderType)
@@ -224,39 +248,73 @@ namespace WarehousingMockUp
         }
 
         //todo: needs refactoring
+        /// <summary>
+        /// Returns specified production order list
+        /// </summary>
+        /// <returns></returns>
         public List<ProductionOrders> GetProductionOrderList()
         {
             return productionOrders;
         }
 
+        /// <summary>
+        /// Returns specified production order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ProductionOrders GetSingleProductionOrder(int id)
         {
             return productionOrders[id];
         }
 
+        /// <summary>
+        /// Returns sales order list
+        /// </summary>
+        /// <returns></returns>
         public List<SalesOrders> GetSalesOrderList()
         {
             return salesOrders;
         }
 
+        /// <summary>
+        /// Returns specified sales order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public SalesOrders GetSingleSalesOrder(int id)
         {
             return salesOrders[id];
         }
 
+        /// <summary>
+        /// Returns purchase order list
+        /// </summary>
+        /// <returns></returns>
         public List<PurchaseOrders> GetPurchaseOrderList()
         {
             return purchaseOrders;
         }
 
+        /// <summary>
+        /// Returns specified purchase order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public PurchaseOrders GetSinglePurchaseOrder(int id)
         {
             return purchaseOrders[id];
         }
 
+        //todo: automatically create production order if products are insufficient, or automatically create purchase order if components are insufficient
+        /// <summary>
+        /// Compares order with the inventory stock, subtracting the stock if they are sufficient
+        /// </summary>
+        /// <param name="orderID"></param>
+        /// <param name="orderType"></param>
         public void CompleteOrder(int orderID, string orderType)
         {
             dynamic order;
+            bool sufficientStock;
 
             switch (orderType)
             {
@@ -269,6 +327,62 @@ namespace WarehousingMockUp
                 case "sale":
                     order = GetSingleSalesOrder(orderID);
                     break;
+                default:
+                    order = new OrderHandler();
+                    break;
+            }
+
+            if (!orderType.Equals("purchase"))
+            {
+                if (order.getOrderedProducts().Count > 0)
+                {
+                    sufficientStock = true;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (!sufficientStock)
+                        {
+                            break;
+                        }
+                        foreach (ProductStock product in order.getOrderedProducts())
+                        {
+                            if (productStockList[product.getItemID].getStock >= product.getStock)
+                            {
+                                if (i > 0)
+                                {
+                                    productStockList[product.getItemID].SubtractFromStock(product.getStock);
+                                }
+                            }
+                            else
+                            {
+                                sufficientStock = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (order.getOrderedComponents().Count > 0)
+                {
+                    sufficientStock = true;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        foreach (ComponentStock components in order.getOrderedComponents())
+                        {
+                            if (componentStockList[components.getItemID].getStock >= components.getStock)
+                            {
+                                if (i > 0)
+                                {
+                                    componentStockList[components.getItemID].SubtractFromStock(components.getStock);
+                                }
+                            }
+                            else
+                            {
+                                sufficientStock = false; 
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
